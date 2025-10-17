@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Green Letter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Georgia', serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .letter-container {
+            width: 90%;
+            max-width: 600px;
+            perspective: 1200px;
+        }
+        
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease;
+            margin: 0 auto;
+        }
+        
+        .envelope.open {
+            transform: translateY(50px);
+        }
+        
+        .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        .envelope-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 3;
+            transform-origin: top;
+            transition: transform 0.8s ease;
+        }
+        
+        .envelope.open .envelope-front {
+            transform: rotateX(180deg);
+        }
+        
+        .envelope-flap {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            border-radius: 8px 8px 0 0;
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            z-index: 4;
+            transform-origin: top;
+            transition: transform 0.8s ease;
+        }
+        
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+        
+        .letter-paper {
+            position: absolute;
+            width: 95%;
+            height: 90%;
+            background-color: #f9f7f1;
+            border-radius: 4px;
+            padding: 30px;
+            top: 5%;
+            left: 2.5%;
+            z-index: 2;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease 0.3s;
+            overflow-y: auto;
+            cursor: default;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .envelope.open .letter-paper {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .letter-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            z-index: 5;
+            transition: opacity 0.3s ease;
+        }
+        
+        .envelope.open .letter-icon {
+            opacity: 0;
+        }
+        
+        .instruction {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            transition: opacity 0.3s ease;
+        }
+        
+        .envelope.open .instruction {
+            opacity: 0;
+        }
+        
+        .letter-content h2 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #4caf50;
+            padding-bottom: 10px;
+        }
+        
+        .letter-content p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .letter-content .closing {
+            margin-top: 30px;
+            text-align: right;
+        }
+        
+        .letter-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .line {
+            position: absolute;
+            background-color: rgba(76, 175, 80, 0.2);
+            left: 10%;
+            right: 10%;
+        }
+        
+        .line.horizontal {
+            height: 1px;
+        }
+        
+        .line.vertical {
+            width: 1px;
+            top: 10%;
+            bottom: 10%;
+        }
+        
+        /* Scrollbar styling */
+        .letter-paper::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .letter-paper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .letter-paper::-webkit-scrollbar-thumb {
+            background: #4caf50;
+            border-radius: 10px;
+        }
+        
+        .letter-paper::-webkit-scrollbar-thumb:hover {
+            background: #2e7d32;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .envelope {
+                height: 250px;
+            }
+            
+            .letter-paper {
+                padding: 20px;
+            }
+            
+            .letter-icon {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="letter-container">
+        <div class="envelope" id="envelope">
+            <div class="envelope-back"></div>
+            <div class="letter-paper">
+                <div class="letter-content">
+                    <h2>A Special Message</h2>
+                    <p>Dear Friend,</p>
+                    <p>I hope this letter finds you well. Sometimes, the simplest gestures can carry the most meaning, and I wanted to take a moment to share my thoughts with you.</p>
+                    <p>In our fast-paced world, it's easy to overlook the small moments of connection that make life meaningful. This digital letter is my way of pausing to appreciate our connection.</p>
+                    <p>Remember that every day brings new opportunities for growth, joy, and discovery. Even when challenges arise, they are merely stepping stones on your unique path.</p>
+                    <p>Take time to appreciate the beauty around you - the warmth of sunlight, the sound of laughter, the comfort of a good book. These small pleasures are the fabric of a rich life.</p>
+                    <p>I hope this message brings a smile to your face and reminds you that you are valued. May your days be filled with purpose and your heart with contentment.</p>
+                    <p class="closing">With warm regards,<br>Your Friend</p>
+                </div>
+            </div>
+            <div class="envelope-front"></div>
+            <div class="envelope-flap"></div>
+            <div class="letter-icon">✉️</div>
+            <div class="instruction">Click to open the letter</div>
+            
+            <!-- Letter lines -->
+            <div class="letter-lines">
+                <div class="line horizontal" style="top: 20%"></div>
+                <div class="line horizontal" style="top: 40%"></div>
+                <div class="line horizontal" style="top: 60%"></div>
+                <div class="line horizontal" style="top: 80%"></div>
+                <div class="line vertical" style="left: 20%"></div>
+                <div class="line vertical" style="left: 40%"></div>
+                <div class="line vertical" style="left: 60%"></div>
+                <div class="line vertical" style="left: 80%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const envelope = document.getElementById('envelope');
+            let isOpen = false;
+            
+            envelope.addEventListener('click', function() {
+                if (!isOpen) {
+                    // Open the envelope
+                    envelope.classList.add('open');
+                    isOpen = true;
+                }
+            });
+            
+            // Close the envelope if clicking outside when open
+            document.addEventListener('click', function(event) {
+                if (isOpen && !envelope.contains(event.target)) {
+                    envelope.classList.remove('open');
+                    isOpen = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
